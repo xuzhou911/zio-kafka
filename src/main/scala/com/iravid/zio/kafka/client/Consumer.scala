@@ -10,6 +10,8 @@ import scalaz.zio.duration._
 import scala.collection.JavaConverters._
 
 trait Consumer {
+  def assignment: BlockingTask[Set[TopicPartition]]
+
   def commit(data: OffsetMap): BlockingTask[Unit]
 
   def poll(pollTimeout: Duration): BlockingTask[Map[TopicPartition, Chunk[ByteRecord]]]
@@ -34,6 +36,8 @@ trait Consumer {
 object Consumer {
   def unsafeMake(c: ByteConsumer): Consumer =
     new Consumer {
+      def assignment = blocking(ZIO(c.assignment().asScala.toSet))
+
       def commit(data: OffsetMap) = blocking(ZIO(c.commitSync(data.asJava)))
 
       def adaptConsumerRecords(records: ByteRecords): Map[TopicPartition, Chunk[ByteRecord]] = {

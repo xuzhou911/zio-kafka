@@ -44,6 +44,7 @@ object Producer {
       new ByteProducer(props, new ByteArraySerializer, new ByteArraySerializer)
     }
 
+    // TODO: Add blocking on the producer close
     p.managed(p => UIO(p.close(settings.closeTimeout.toMillis, TimeUnit.MILLISECONDS)))
       .map(unsafeMake)
   }
